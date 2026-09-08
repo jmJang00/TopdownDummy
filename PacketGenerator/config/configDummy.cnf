@@ -1,0 +1,64 @@
+global
+{
+    print_log_level = 2
+    file_log_level = 3
+    idl = "./tmpl/packet.xidl"
+    out = "./out/data.json"
+    generate_json = 1
+}
+
+generator
+{
+    verbose = 0
+    target = "client"
+    language = "cpp"
+}
+
+file
+{
+    tmpl = "./tmpl/PacketManager.h.tmpl"
+    json = "./out/data.json"
+    out = "../src/packet"
+}
+
+file
+{
+    tmpl = "./tmpl/PacketManager.cpp.tmpl"
+    json = "./out/data.json"
+    out = "../src/packet"
+}
+
+file
+{
+    tmpl = "./tmpl/Packet.h.tmpl"
+    json = "./out/data.json"
+    out = "../src/packet"
+}
+
+file
+{
+    tmpl = "./tmpl/Packet.cpp.tmpl"
+    json = "./out/data.json"
+    out = "../src/packet"
+}
+
+file
+{
+    tmpl = "./tmpl/Proxy.h.tmpl"
+    json = "./out/data.json"
+    out = "../src/packet"
+}
+
+file
+{
+    tmpl = "./tmpl/Proxy.cpp.tmpl"
+    json = "./out/data.json"
+    out = "../src/packet"
+}
+
+file
+{
+    tmpl = "./tmpl/Stub.h.tmpl"
+    json = "./out/data.json"
+    out = "../src/packet"
+}

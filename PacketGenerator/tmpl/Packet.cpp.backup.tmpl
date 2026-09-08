@@ -1,0 +1,66 @@
+#include "pch.h"
+#include "Packet.h"
+#include <JNet/CPacket.h>
+#include <JNet/CPacketView.h>
+
+const wchar_t* gRequestIdStr[] = 
+{
+	{% for message in messages %}
+	{% if can_send(message.direction) %}
+    L"{{ message.packet_id }}",
+	{% endif %}
+	{% endfor %}
+};
+
+const int gRequestIdStrCnt = sizeof(gRequestIdStr) / sizeof(gRequestIdStr[0]);
+
+{% for struct in structs %}
+CPacket& operator<<(CPacket& packet, const {{ struct.name }}& obj)
+{
+	{% for field in struct.fields %}
+	packet << obj.{{ field.name }};
+	{% endfor %}
+	return packet;
+}
+
+CPacket& operator<<(CPacket& packet, const FBufferView<{{ struct.name }}>& obj)
+{
+	packet << obj.size;
+	for (int i = 0; i < obj.size; i++)
+	{
+		packet << obj.data[i];
+	}
+	return packet;
+}
+
+CPacketView& operator>>(CPacketView& packet, {{ struct.name }}& obj)
+{
+	{% for field in struct.fields %}
+	packet >> obj.{{ field.name }};
+	{% endfor %}
+	return packet;
+}
+
+CPacketView& operator>>(CPacketView& packet, FBufferView<{{ struct.name }}>& obj)
+{
+	packet >> obj.size;
+	if (packet.GetLastError() != CPacketView::Default)
+	{
+		return packet;
+	}
+
+	int bytes = sizeof({{ struct.name }}) * obj.size;
+	if (bytes <= packet.GetBufferSize())
+	{
+		obj.data = ({{ struct.name }}*)(packet.GetBufferPtr() + packet.GetReadPos());
+		packet.MoveReadPos(bytes);
+	}
+	else
+	{
+		packet.SetLastError(CPacketView::ErrorDeserialize);
+	}
+
+	return packet;
+}
+
+{% endfor %}

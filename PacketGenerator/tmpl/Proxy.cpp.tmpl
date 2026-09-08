@@ -1,0 +1,204 @@
+#include "pch.h"
+#include <JNet/CPacket.h>
+#include <JNet/CSession.h>
+#include <JNet/CNetServer.h>
+#include <JNet/CNetClient.h>
+#include <JNet/FBufferView.h>
+//#include <JCore/SLog.h>
+#include "PacketManager.h"
+#include "Proxy.h"
+#include "Packet.h"
+#include "DummyClient.h"
+
+//#undef DLOGHA()
+//#define DLOGHA()
+
+{% for message in messages %}
+{% if can_send(message.direction) %}
+bool Proxy::{{ message.name }}(FSessionId sessionId{% for field in message.fields %}, {{ arg_type(field.type) }} {{ field.name }}{% endfor %})
+{
+	CPacket* packet = CPacket::Alloc(false);
+
+	*packet << (unsigned short){{ packet_id_enum }}::{{ message.packet_enum }};
+	{% for field in message.fields %}
+	*packet << {{ field.name }};
+	{% endfor %}
+
+	if (packet->GetLastError() != CPacket::Default)
+	{
+		CPacket::Free(packet);
+		DLOGA(L"Packet", L"Make Packet Fail");
+		return false;
+	}
+
+	packet->Commit();
+
+	_server->SendPacket(sessionId, packet->GetPacketBuffer());
+
+	{% if not has_attribute(message, "nolog") %}
+	if (packet->Encoding())
+	{
+		DLOGHA(L"Packet", L"Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeaderEx) - sizeof(PacketType));
+	}
+	else
+	{
+		DLOGHA(L"Packet", L"Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+	{% endif %}
+
+	CPacket::Free(packet);
+
+	return true;
+}
+
+bool Proxy::{{ message.name }}(FSessionId* sessionIds, size_t cnt{% for field in message.fields %}, {{ arg_type(field.type) }} {{ field.name }}{% endfor %})
+{
+	CPacket* packet = CPacket::Alloc(false);
+
+	*packet << (unsigned short){{ packet_id_enum }}::{{ message.packet_enum }};
+	{% for field in message.fields %}
+	*packet << {{ field.name }};
+	{% endfor %}
+
+	if (packet->GetLastError() != CPacket::Default)
+	{
+		CPacket::Free(packet);
+		DLOGA(L"Packet", L"Make Packet Fail");
+		return false;
+	}
+
+	packet->Commit();
+
+	for (size_t i = 0; i < cnt; i++)
+	{
+		_server->SendPacket(sessionIds[i], packet->GetPacketBuffer());
+	}
+
+	{% if not has_attribute(message, "nolog") %}
+	if (packet->Encoding())
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+	else
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+	{% endif %}
+
+	CPacket::Free(packet);
+
+	return true;
+}
+
+bool Proxy::{{ message.name }}(FSessionId sessionId, const {{ message.name }}Args* args)
+{
+	CPacket* packet = CPacket::Alloc(false);
+
+	*packet << (unsigned short){{ packet_id_enum }}::{{ message.packet_enum }};
+	{% for field in message.fields %}
+	*packet << args->{{ field.name }};
+	{% endfor %}
+
+	if (packet->GetLastError() != CPacket::Default)
+	{
+		CPacket::Free(packet);
+		DLOGA(L"Packet", L"Make Packet Fail");
+		return false;
+	}
+
+	packet->Commit();
+
+	_server->SendPacket(sessionId, packet->GetPacketBuffer());
+
+	{% if not has_attribute(message, "nolog") %}
+	if (packet->Encoding())
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+	else
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+	{% endif %}
+
+	CPacket::Free(packet);
+
+	return true;
+}
+
+bool Proxy::{{ message.name }}(FSessionId* sessionIds, size_t cnt, const {{ message.name }}Args* args)
+{
+	CPacket* packet = CPacket::Alloc(false);
+
+	*packet << (unsigned short){{ packet_id_enum }}::{{ message.packet_enum }};
+	{% for field in message.fields %}
+	*packet << args->{{ field.name }};
+	{% endfor %}
+
+	if (packet->GetLastError() != CPacket::Default)
+	{
+		CPacket::Free(packet);
+		DLOGA(L"Packet", L"Make Packet Fail");
+		return false;
+	}
+
+	packet->Commit();
+
+	for (size_t i = 0; i < cnt; i++)
+	{
+		_server->SendPacket(sessionIds[i], packet->GetPacketBuffer());
+	}
+
+	{% if not has_attribute(message, "nolog") %}
+	if (packet->Encoding())
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+	else
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+	{% endif %}
+
+	CPacket::Free(packet);
+
+	return true;
+}
+
+{% endif %}
+{% endfor %}
+
+bool Proxy::Send(FSessionId* sessionIds, size_t cnt, const MessageArgs* args)
+{
+	switch (args->protocol)
+	{
+	{% for message in messages %}
+	{% if can_send(message.direction) %}
+	case {{ packet_id_enum }}::{{ message.packet_enum }}:
+	{
+		return {{ message.name }}(sessionIds, cnt, (const {{ message.name }}Args*)args);
+	}
+	{% endif %}
+	{% endfor %}
+	default:
+		return false;
+	}
+}
+
+bool Proxy::Send(FSessionId sessionId, const MessageArgs* args)
+{
+	switch (args->protocol)
+	{
+	{% for message in messages %}
+	{% if can_send(message.direction) %}
+	case {{ packet_id_enum }}::{{ message.packet_enum }}:
+	{
+		return {{ message.name }}(sessionId, (const {{ message.name }}Args*)args);
+	}
+	{% endif %}
+	{% endfor %}
+	default:
+		return false;
+	}
+}
+

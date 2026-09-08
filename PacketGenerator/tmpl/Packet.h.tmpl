@@ -1,0 +1,75 @@
+#pragma once
+#include <stdint.h>
+#include <JNet/FBufferView.h>
+#include <JCore/Warnings.h>
+
+class CPacket;
+class CPacketView;
+
+enum PacketHandleCode
+{
+	PH_SUCCESS,
+	PH_FAIL1,
+	PH_FAIL2,
+	PH_FAIL3,
+	PH_FAIL4,
+	PH_FAIL5,
+	PH_FAIL6,
+	PH_FAIL7,
+	PH_FAIL8,
+	PH_FAIL9,
+	PH_NOT_DEFINED,
+};
+
+{% for enum in enums %}
+enum class {{ enum.name }} {% if enum.underlying_type %}: {{ cpp_type(enum.underlying_type.name) }} 
+{% endif %}
+{
+	{% for value in enum.values %}
+    {{ value.name }}={{ value.value }},
+	{% endfor %}
+}; 
+ 
+inline constexpr int {{ upper_snake_case(enum.name) }}_MAX = {{ length(enum.values) }};
+{% endfor %}
+
+
+DISABLE_WARNINGS_BEGIN(WARNING_26495)
+
+{% for struct in structs %}
+struct {{ struct.name }};
+{% endfor %}
+
+{% for struct in structs %}
+#pragma pack(push, 1)
+struct {{ struct.name }}
+{
+	{% for field in struct.fields %}
+	{{ decl_type(field.type) }} {{ field.name }};
+	{% endfor %}
+};
+#pragma pack(pop)
+
+CPacket& operator<<(CPacket& packet, const {{ struct.name }}& obj);
+CPacketView& operator>>(CPacketView& packet, {{ struct.name }}& obj);
+
+CPacket& operator<<(CPacket& packet, const FBufferView<{{ struct.name }}>& obj);
+CPacketView& operator>>(CPacketView& packet, FBufferView<{{ struct.name }}>& obj);
+
+{% endfor %}
+
+DISABLE_WARNINGS_END()
+
+extern const wchar_t* gRequestIdStr[];
+extern const int gRequestIdStrCnt;
+
+enum class RequestId : unsigned short
+{
+	{% for message in messages %}
+	{% if can_send(message.direction) %}
+    {{ pascal_case(lower(substr(message.packet_enum, 2, length(message.packet_enum) - 2))) }},
+	{% endif %}
+	{% endfor %}
+	MaxRequest
+};
+

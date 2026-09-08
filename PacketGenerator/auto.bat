@@ -1,0 +1,1 @@
+.\IdlCompiler.exe --config configDummy.cnf

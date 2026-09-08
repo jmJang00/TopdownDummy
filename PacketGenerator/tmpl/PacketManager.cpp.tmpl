@@ -1,0 +1,65 @@
+#include "pch.h"
+#include <JNet/CPacket.h>
+#include <JNet/CPacketView.h>
+#include <JNet/CSession.h>
+//#include <JCore/SLog.h>
+#include "PacketManager.h"
+#include "Packet.h"
+
+//#undef DLOGHA()
+//#define DLOGHA()
+
+{% for message in messages %}
+{% if can_recv(message.direction) %}
+bool PacketManager::PP_{{ message.name }}(CPacketView* packet, FSessionId sessionId)
+{
+	{% if not has_attribute(message, "nolog") %}
+	DLOGHA(L"Packet", L"Recv", (unsigned char*)packet->GetBufferPtr(), packet->GetBufferSize());
+	{% endif %}
+
+	{% for field in message.fields %}
+	{{ decl_type(field.type) }} {{ field.name }};
+	*packet >> {{ field.name }};
+	{% endfor %}
+
+	if (packet->GetLastError() != CPacketView::Default)
+	{
+		DLOGA(L"Packet", L"Packet Deserialize Fail");
+		return false;
+	}
+
+	_lastError = _stub->{{ message.name }}(sessionId{% for field in message.fields %}, {{ field.name }}{% endfor %});
+	if (_lastError != PH_SUCCESS)
+	{
+		DLOGA(L"Packet", L"Packet Process Fail %d", _lastError);
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+{% endif %}
+{% endfor %}
+
+bool PacketManager::PacketProc({{ packet_id_enum }} type, CPacketView* packet, FSessionId sessionId)
+{
+	if (_stub == nullptr)
+	{
+		return false;
+	}
+
+	switch (type)
+	{
+	{% for message in messages %}
+	{% if can_recv(message.direction) %}
+	case {{ packet_id_enum }}::{{ message.packet_enum }}:
+	{
+		return PP_{{ message.name }}(packet, sessionId);
+	}
+	{% endif %}
+	{% endfor %}
+	default:
+		return false;
+	}
+}

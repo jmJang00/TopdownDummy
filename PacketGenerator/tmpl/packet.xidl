@@ -1,0 +1,609 @@
+
+packet_id_enum PacketType;
+
+enum PacketType : ushort {
+    // 100 - 계정
+    C_REQ_LOGIN_GAME_SERVER = 100,
+    S_RES_LOGIN_GAME_SERVER = 101,
+    C_REQ_LOGIN_CHAT_SERVER = 102,
+    S_RES_LOGIN_CHAT_SERVER = 103,
+    S_NTF_ACCOUNT_INFO = 104,
+	
+    // 200 - 커뮤니티 (친구)
+
+    // 300 - 파티
+
+    // 400 - 플레이
+    C_MATCH_START = 400,
+	C_MATCH_CANCEL = 401,
+
+    // 500 - 스폰
+    S_NTF_CREATE_MY_CHARACTER = 500,
+    S_NTF_CREATE_OTHER_CHARACTER = 501,
+    S_DELETE_CHARACTER = 502,
+
+    // 600 - 게임 진행
+	S_MATCH_FOUND = 600,
+	S_GAME_START = 601,
+	S_GAME_END = 602,
+	C_SCENE_READY = 603,
+	C_WEAPON_SELECT = 604,
+    C_RETURN_TO_LOBBY = 605,
+	S_RETURN_TO_LOBBY = 606,
+    C_ACCOUNT_INFO_DEBUG = 607,
+    C_QUIT_GAME = 608,
+    C_REQ_SPECTATE_GAME = 609,
+    S_NTF_SPECTATE_USER = 610,
+    C_REQ_SPECTATE_NEXT = 611,
+    C_REQ_SPECTATE_PREV = 612,
+
+    // 700 - 무기
+    C_PROJECTILE_SHOOT_START = 700,
+    S_PROJECTILE_SHOOT_START = 701,
+	S_SPAWN_PROJECTILE = 702,
+	S_DESPAWN_PROJECTILE = 703,
+	S_PROJECTILE_HIT = 704,
+    C_HITSCAN_SHOOT_START = 720,
+    S_HITSCAN_SHOOT_START = 721,
+    S_NTF_HITSCAN_SHOOT_START = 722,
+    S_NTF_HITSCAN_SHOOT_STATE = 723,
+    C_HITSCAN_HIT = 724,    
+    S_HITSCAN_HIT = 725,
+	C_REQ_RELOAD_BULLET = 726,
+    S_NTF_UPDATE_BULLET = 727,
+
+    // 800 - 경험치
+
+    // 900 - 아이템
+    S_NTF_SPAWN_ITEM_PICKER = 900,
+    S_NTF_DESPAWN_ITEM_PICKER = 901,
+    C_REQ_PICKUP_ITEM_PICKER = 902,
+
+    // 1000 - 상자
+    S_NTF_CREATE_CHEST = 1000,
+    S_NTF_DESTROY_CHEST = 1001,
+    C_OPEN_CHEST = 1002,
+    C_CLOSE_CHEST = 1003,
+    S_OPEN_CHEST = 1004,
+    S_CLOSE_CHEST = 1005,
+    S_NTF_CHEST_INFO = 1006,
+    C_REQ_INVENTORY_TO_CHEST = 1007,
+    S_RES_INVENTORY_TO_CHEST = 1008,
+    C_REQ_CHEST_TO_INVENTORY = 1009,
+    S_RES_CHEST_TO_INVENTORY = 1010,
+    C_REQ_INVENTORY_INFO = 1011,
+    S_RES_INVENTORY_INFO = 1012,
+
+    // 1100 - 이동
+    C_MOVE_START = 1100,
+    S_MOVE_START = 1101,
+    S_MOVE_STATE = 1102,
+    S_TICK_SYNC = 1103,
+    C_ROTATE_START = 1104,
+    S_ROTATE_START = 1105,
+    S_ROTATE_STATE = 1106
+}
+
+struct Vector2 {
+    float x;
+    float y;
+}
+
+struct ItemElem
+{
+    uint cursor;
+    uint itemId;
+    uint quantity;
+}
+
+struct AccountInfo
+{
+    int id;
+    string nickname;
+    int level;
+}
+
+struct ResultInfo
+{
+    int accountId;
+    int score;
+    int exp;
+    int kill;
+}
+
+// 100 - 계정 ================================================================================
+
+[direction(client_to_server)]
+[packet(C_REQ_LOGIN_GAME_SERVER)]
+message C_ReqLoginGameServer {
+    string sessionKey;
+}
+
+[direction(server_to_client)]
+[packet(S_RES_LOGIN_GAME_SERVER)]
+message S_ResLoginGameServer {
+    bool loginOk;
+    AccountInfo account;
+}
+
+[direction(client_to_server)]
+[packet(C_REQ_LOGIN_CHAT_SERVER)]
+message C_ReqLoginChatServer {
+    string sessionKey;
+}
+
+[direction(server_to_client)]
+[packet(S_RES_LOGIN_CHAT_SERVER)]
+message S_ResLoginChatServer {
+    bool loginOk;
+}
+
+[direction(server_to_client)]
+[packet(S_NTF_ACCOUNT_INFO)]
+message S_NtfAccountInfo {
+    array<AccountInfo> account;
+}
+
+
+// 200 - 커뮤니티 (친구) ================================================================================
+
+// 300 - 파티 ================================================================================
+
+// 400 - 플레이 ================================================================================
+[direction(client_to_server)]
+[packet(C_MATCH_START)]
+message C_MatchStart {
+
+}
+
+[direction(client_to_server)]
+[packet(C_MATCH_CANCEL)]
+message C_MatchCancel {
+
+}
+
+
+// 500 - 스폰 ================================================================================
+[direction(server_to_client)]
+[packet(S_NTF_CREATE_MY_CHARACTER)]
+message S_NtfCreateMyCharacter {
+    int serverTick;
+    uint entityId;
+    ushort health;
+    ushort weaponId;
+}
+
+[direction(server_to_client)]
+[packet(S_NTF_CREATE_OTHER_CHARACTER)]
+message S_NtfCreateOtherCharacter {
+    int serverTick;
+    uint entityId;
+    ushort health;
+    ushort weaponId;
+    int accountId;
+    bool isBot;
+}
+
+[direction(server_to_client)]
+[packet(S_DELETE_CHARACTER)]
+message S_DeleteCharacter {
+    int serverTick;
+    uint id;
+}
+
+// 600 - 게임 진행 ================================================================================
+
+[direction(server_to_client)]
+[packet(S_MATCH_FOUND)]
+message S_MatchFound {
+    bool success;
+}
+
+[direction(server_to_client)]
+[packet(S_GAME_START)]
+message S_GameStart {
+    bool success;
+    int tick;
+}
+
+[direction(server_to_client)]
+[packet(S_GAME_END)]
+message S_GameEnd {
+    bool win;
+	array<ResultInfo> resultInfo;
+}
+
+[direction(client_to_server)]
+[packet(C_SCENE_READY)]
+message C_SceneReady {
+
+}
+
+[direction(client_to_server)]
+[packet(C_WEAPON_SELECT)]
+message C_WeaponSelect {
+    ushort weaponId;
+}
+
+[direction(client_to_server)]
+[packet(C_RETURN_TO_LOBBY)]
+message C_ReturnToLobby {
+
+}
+
+[direction(server_to_client)]
+[packet(S_RETURN_TO_LOBBY)]
+message S_ReturnToLobby {
+
+}
+
+[direction(client_to_server)]
+[packet(C_ACCOUNT_INFO_DEBUG)]
+message C_AccountInfoDebug {
+    long accountId;
+}
+
+[direction(client_to_server)]
+[packet(C_QUIT_GAME)]
+message C_QuitGame {
+}
+
+
+[direction(client_to_server)]
+[packet(C_REQ_SPECTATE_GAME)]
+message C_ReqSpectateGame {
+
+}
+
+[direction(server_to_client)]
+[packet(S_NTF_SPECTATE_USER)]
+message S_NtfSpectateUser {
+    int tick;
+    uint entityId;
+}
+
+[direction(client_to_server)]
+[packet(C_REQ_SPECTATE_NEXT)]
+message C_ReqSpectateNext {
+
+}
+
+[direction(client_to_server)]
+[packet(C_REQ_SPECTATE_PREV)]
+message C_ReqSpectatePrev {
+
+}
+
+// 700 - 무기 ================================================================================
+[direction(client_to_server)]
+[packet(C_PROJECTILE_SHOOT_START)]
+[nolog]
+message C_ProjectileShootStart {
+    int clientTick;
+}
+
+[direction(server_to_client)]
+[packet(S_PROJECTILE_SHOOT_START)]
+[nolog]
+message S_ProjectileShootStart {
+    int acceptTick;
+    uint id;
+}
+
+[direction(server_to_client)]
+[packet(S_SPAWN_PROJECTILE)]
+[nolog]
+message S_SpawnProjectile {
+    int acceptTick;
+    uint id;
+    Vector2 spawnPos;
+    Vector2 targetPos;
+}
+
+[direction(server_to_client)]
+[packet(S_DESPAWN_PROJECTILE)]
+[nolog]
+message S_DespawnProjectile {
+    int acceptTick;
+    uint id;
+}
+
+[direction(server_to_client)]
+[packet(S_PROJECTILE_HIT)]
+[nolog]
+message S_ProjectileHit {
+    int acceptTick;
+    ushort damage;
+    uint bulletId;
+    uint collisionId;
+}
+
+[direction(client_to_server)]
+[packet(C_HITSCAN_SHOOT_START)]
+message C_HitscanShootStart
+{
+    int clientTick;
+    float startX;
+    float startY;
+    float endX;
+    float endY;
+}
+
+[direction(server_to_client)]
+[packet(S_HITSCAN_SHOOT_START)]
+message S_HitscanShootStart
+{
+    int acceptTick;
+    uint entityId;
+    float startX;
+    float startY;
+    float endX;
+    float endY;
+}
+
+[direction(server_to_client)]
+[packet(S_NTF_HITSCAN_SHOOT_START)]
+message S_NtfHitscanShootStart
+{
+    int accpetTick;
+    uint accountId;
+}
+
+[direction(server_to_client)]
+[packet(S_NTF_HITSCAN_SHOOT_STATE)]
+message S_NtfHitscanShootState
+{
+    int serverTick;
+    uint accountId;
+    ulong bulletMaskLow;
+    ulong bulletMaskHigh;
+    int baseTick;
+}
+
+[direction(client_to_server)]
+[packet(C_HITSCAN_HIT)]
+message C_HitscanHit
+{
+    int currentTick;
+    uint shooterId;
+    uint targetId;
+}
+
+[direction(server_to_client)]
+[packet(S_HITSCAN_HIT)]
+message S_HitscanHit
+{
+    int serverTick;
+    ushort damage;
+    uint shooterId;
+    uint targetId;
+}
+
+[direction(client_to_server)]
+[packet(C_REQ_RELOAD_BULLET)]
+message C_ReqReloadBullet
+{
+    int clientTick;
+}
+
+[direction(server_to_client)]
+[packet(S_NTF_UPDATE_BULLET)]
+message S_NtfUpdateBullet
+{
+    int serverTick;
+    ushort bulletCount;
+}
+
+// 800 - 경험치 ================================================================================
+
+// 900 - 아이템 ================================================================================
+[direction(server_to_client)]
+[packet(S_NTF_SPAWN_ITEM_PICKER)]
+message S_NtfSpawnItemPicker
+{
+    int serverTick;
+    uint entityId;
+    uint itemType;
+    float targetX;
+    float targetY;
+}
+
+[direction(server_to_client)]
+[packet(S_NTF_DESPAWN_ITEM_PICKER)]
+message S_NtfDespawnItemPicker
+{
+    int serverTick;
+    uint entityId;
+    uint itemType;
+}
+
+[direction(client_to_server)]
+[packet(C_REQ_PICKUP_ITEM_PICKER)]
+message C_ReqPickupItemPicker
+{
+    int clientTick;
+    uint entityId;
+}
+
+// 1000 - 상자 ================================================================================
+
+[direction(server_to_client)]
+[packet(S_NTF_CREATE_CHEST)]
+message S_NtfCreateChest
+{
+    int serverTick;
+    uint entityId;
+    Vector2 target;
+}
+
+[direction(server_to_client)]
+[packet(S_NTF_DESTROY_CHEST)]
+message S_NtfDestroyChest
+{
+    int serverTick;
+    uint entityId;    
+}
+
+[direction(client_to_server)]
+[packet(C_OPEN_CHEST)]
+message C_OpenChest
+{
+    int clientTick;
+    uint chestId;
+}
+
+[direction(client_to_server)]
+[packet(C_CLOSE_CHEST)]
+message C_CloseChest
+{
+    int clientTick;
+    uint chestId;
+}
+
+[direction(server_to_client)]
+[packet(S_OPEN_CHEST)]
+message S_OpenChest
+{
+    int serverTick;
+    uint chestId;
+    ushort resultCode;   
+}
+
+[direction(server_to_client)]
+[packet(S_CLOSE_CHEST)]
+message S_CloseChest
+{
+    int clientTick;
+    uint chestId;
+    ushort resultCode;   
+}
+
+[direction(server_to_client)]
+[packet(S_NTF_CHEST_INFO)]
+message S_NtfChestInfo
+{
+    int serverTick;
+    uint chestId;
+    array<ItemElem> itemLists;
+}
+
+[direction(client_to_server)]
+[packet(C_REQ_INVENTORY_INFO)]
+message C_ReqInventoryInfo
+{
+    int clientTick;
+}
+
+[direction(server_to_client)]
+[packet(S_RES_INVENTORY_INFO)]
+message S_ResInventoryInfo
+{
+    int serverTick;
+    array<ItemElem> itemLists;
+}
+
+[direction(client_to_server)]
+[packet(C_REQ_INVENTORY_TO_CHEST)]
+message C_ReqInventoryToChest
+{
+    int clientTick;
+    int lastUpdateTick;
+    int lastInventoryUpdateTick;
+    uint entityId;
+    uint inventoryCursor;
+    uint chestId;
+}
+
+[direction(server_to_client)]
+[packet(S_RES_INVENTORY_TO_CHEST)]
+message S_ResInventoryToChest
+{
+    int serverTick;
+    ushort resultCode;
+}
+
+[direction(client_to_server)]
+[packet(C_REQ_CHEST_TO_INVENTORY)]
+message C_ReqChestToInventory
+{
+    int clientTick;
+    int lastUpdateTick;
+    int lastInventoryUpdateTick;
+    uint entityId;
+    uint chestId;
+    uint chestCursor;
+}
+
+[direction(server_to_client)]
+[packet(S_RES_CHEST_TO_INVENTORY)]
+message S_ResChestToInventory
+{
+    int serverTick;
+    ushort resultCode;
+}
+
+
+// 1100 - 이동 ================================================================================
+
+[direction(client_to_server)]
+[packet(C_MOVE_START)]
+[nolog]
+message C_MoveStart {
+    int clientTick;
+    Vector2 target;
+}
+
+[direction(server_to_client)]
+[packet(S_MOVE_START)]
+[nolog]
+message S_MoveStart {
+    int acceptTick;
+    uint id;
+    Vector2 target;
+}
+
+[direction(server_to_client)]
+[packet(S_MOVE_STATE)]
+[nolog]
+message S_MoveState {
+    int currentTick;
+    uint id;
+    Vector2 pos;
+    Vector2 target;
+}
+
+[direction(server_to_client)]
+[packet(S_TICK_SYNC)]
+[nolog]
+message S_TickSync {
+    int serverTick;
+}
+
+[direction(client_to_server)]
+[packet(C_ROTATE_START)]
+[nolog]
+message C_RotateStart {
+    int clientTick;
+    float targetAngle;
+}
+
+[direction(server_to_client)]
+[packet(S_ROTATE_START)]
+[nolog]
+message S_RotateStart {
+    int acceptTick;
+    uint id;
+    float targetAngle;
+}
+
+[direction(server_to_client)]
+[packet(S_ROTATE_STATE)]
+[nolog]
+message S_RotateState {
+    int acceptTick;
+    uint id;
+    float currentAngle;
+    float targetAngle;
+}
+
+

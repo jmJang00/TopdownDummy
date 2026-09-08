@@ -1,0 +1,209 @@
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Text;
+using ServerCore;
+
+{% for enum in enums %}
+{% if enum.name == "PacketType" %}
+public enum PacketID
+{
+	{% for value in enum.values %}
+    {{ substr(value.name, 0, 2) }}{{ pascal_case(lower(substr(value.name, 2, length(value.name)))) }} = {{ value.value }},
+	{% endfor %}
+}; 
+{% else %}
+public enum {{ enum.name }}
+{
+	{% for value in enum.values %}
+    {{ value.name }} = {{ value.value }},
+	{% endfor %}
+}; 
+{% endif %}
+{% endfor %}
+
+public interface IPacket
+{
+	ushort Protocol { get; }
+	void Read(ArraySegment<byte> segment);
+	ArraySegment<byte> Write();
+}
+
+{% for message in messages %}
+public class {{ message.name }} : IPacket
+{
+	{% for field in message.fields %}
+	{% if field.type.category == "array" and at(field.type.generic_args, 0).category == "struct" %}
+	{% for struct in structs %}
+	{% if struct.name == at(field.type.generic_args, 0).name %}
+	public class {{ pascal_case(field.name) }}
+	{
+		{% for struct_field in struct.fields %}
+		public {{ decl_type(struct_field.type) }} {{ struct_field.name }};
+		{% endfor %}
+
+		public void Read(ReadOnlySpan<byte> s, ref ushort count)
+		{
+			{% for struct_field in struct.fields %}
+			{% if struct_field.type.category == "primitive" and (struct_field.name == "byte" or struct_field.name == "sbyte") %}
+			this.{{ struct_field.name }} = ({{ decl_type(struct_field.type) }})segment.Array[segment.Offset + count];
+			count += sizeof({{ decl_type(struct_field.type) }});
+			{% else if struct_field.type.category == "primitive" %}
+			this.{{ struct_field.name }} = BitConverter.{{ to_member_type(struct_field.type.name) }}(s.Slice(count, s.Length - count));
+			count += sizeof({{ decl_type(struct_field.type) }});
+			{% else if struct_field.type.category == "string" %}
+			ushort {{ struct_field.name }}Len = BitConverter.ToUInt16(s.Slice(count, s.Length - count));
+			count += sizeof(ushort);
+			this.{{ struct_field.name }} = Encoding.Unicode.GetString(s.Slice(count, {{ struct_field.name }}Len));
+			count += {{ struct_field.name }}Len;
+			{% endif %}
+			{% endfor %}
+		}
+
+		public bool Write(Span<byte> s, ArraySegment<byte> segment, ref ushort count)
+		{
+			bool success = true;
+			{% for struct_field in struct.fields %}
+			{% if struct_field.type.category == "primitive" and (struct_field.name == "byte" or struct_field.name == "sbyte") %}
+			segment.Array[segment.Offset + count] = (byte)this.{{ struct_field.name }};
+			count += sizeof({{ decl_type(struct_field.type) }});
+			{% else if struct_field.type.category == "primitive" %}
+			success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), {{ struct_field.name }});
+			count += sizeof({{ decl_type(struct_field.type) }});
+			{% else if struct_field.type.category == "string" %}
+			ushort {{ struct_field.name }}Len = (ushort)Encoding.Unicode.GetBytes(this.{{ struct_field.name }}, 0, this.{{ struct_field.name }}.Length, segment.Array, segment.Offset + count + sizeof(ushort));
+			success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), {{ struct_field.name }}Len);
+			count += sizeof(ushort);
+			count += {{ struct_field.name }}Len;
+			{% endif %}
+			{% endfor %}
+			return success;
+		}
+	}
+	public List<{{ pascal_case(field.name) }}> {{ field.name }}s = new List<{{ pascal_case(field.name) }}>();
+	{% endif %}
+	{% endfor %}
+	{% else if field.type.category == "struct" %}
+	{% for struct in structs %}
+	{% if struct.name == field.type.name %}
+	{% for struct_field in struct.fields %}
+	public {{ decl_type(struct_field.type) }} {{ field.name }}{{ pascal_case(struct_field.name) }};
+	{% endfor %}
+	{% endif %}
+	{% endfor %}
+	{% else %}
+	public {{ decl_type(field.type) }} {{ field.name }};
+	{% endif %}
+	{% endfor %}
+
+    public ushort Protocol { get { return (ushort)PacketID.{{ message.name }}; } }
+
+    public void Read(ArraySegment<byte> segment)
+    {
+        ushort count = 0;
+
+        ReadOnlySpan<byte> s = new ReadOnlySpan<byte>(segment.Array, segment.Offset, segment.Count);
+        count += sizeof(ushort);
+        count += sizeof(ushort);
+		{% for field in message.fields %}
+		{% if field.type.category == "primitive" and (field.name == "byte" or field.name == "sbyte") %}
+		this.{{ field.name }} = ({{ decl_type(field.type) }})segment.Array[segment.Offset + count];
+		count += sizeof({{ decl_type(field.type) }});
+		{% else if field.type.category == "primitive" %}
+		this.{{ field.name }} = BitConverter.{{ to_member_type(field.type.name) }}(s.Slice(count, s.Length - count));
+		count += sizeof({{ decl_type(field.type) }});
+		{% else if field.type.category == "string" %}
+		ushort {{ field.name }}Len = BitConverter.ToUInt16(s.Slice(count, s.Length - count));
+		count += sizeof(ushort);
+		this.{{ field.name }} = Encoding.Unicode.GetString(s.Slice(count, {{ field.name }}Len));
+		count += {{ field.name }}Len;
+		{% else if field.type.category == "array" %}
+		this.{{ field.name }}s.Clear();
+		ushort {{ field.name }}Len = BitConverter.ToUInt16(s.Slice(count, s.Length - count));
+		count += sizeof(ushort);
+		for (int i = 0; i < {{ field.name }}Len; i++)
+		{
+			{{ pascal_case(field.name) }} {{ field.name }} = new {{ pascal_case(field.name) }}();
+			{{ field.name }}.Read(s, ref count);
+			{{ field.name }}s.Add({{ field.name }});
+		}
+		{% else if field.type.category == "struct" %}
+		{% for struct in structs %}
+		{% if struct.name == field.type.name %}
+		{% for struct_field in struct.fields %}
+		{% if struct_field.type.category == "primitive" and (struct_field.name == "byte" or struct_field.name == "sbyte") %}
+		this.{{ field.name }}{{ pascal_case(struct_field.name) }} = ({{ decl_type(struct_field.type) }})segment.Array[segment.Offset + count];
+		count += sizeof({{ decl_type(struct_field.type) }});
+		{% else if struct_field.type.category == "primitive" %}
+		this.{{ field.name }}{{ pascal_case(struct_field.name) }} = BitConverter.{{ to_member_type(struct_field.type.name) }}(s.Slice(count, s.Length - count));
+		count += sizeof({{ decl_type(struct_field.type) }});
+		{% else if struct_field.type.category == "string" %}
+		ushort {{ field.name }}{{ pascal_case(struct_field.name) }}Len = BitConverter.ToUInt16(s.Slice(count, s.Length - count));
+		count += sizeof(ushort);
+		this.{{ field.name }}{{ pascal_case(struct_field.name) }} = Encoding.Unicode.GetString(s.Slice(count, {{ field.name }}{{ pascal_case(struct_field.name) }}Len));
+		count += {{ field.name }}{{ pascal_case(struct_field.name) }}Len;
+		{% endif %}
+		{% endfor %}
+		{% endif %}
+		{% endfor %}
+		{% endif %}
+		{% endfor %}
+    }
+
+    public ArraySegment<byte> Write()
+    {
+        ArraySegment<byte> segment = SendBufferHelper.Open(4096);
+        ushort count = 0;
+        bool success = true;
+
+        Span<byte> s = new Span<byte>(segment.Array, segment.Offset, segment.Count);
+
+        count += sizeof(ushort);
+        success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)PacketID.{{ message.name }});
+        count += sizeof(ushort);
+		{% for field in message.fields %}
+		{% if field.type.category == "primitive" and (field.name == "byte" or field.name == "sbyte") %}
+		segment.Array[segment.Offset + count] = (byte)this.{{ field.name }};
+		count += sizeof({{ decl_type(field.type) }});
+		{% else if field.type.category == "primitive" %}
+		success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), {{ field.name }});
+		count += sizeof({{ decl_type(field.type) }});
+		{% else if field.type.category == "string" %}
+		ushort {{ field.name }}Len = (ushort)Encoding.Unicode.GetBytes(this.{{ field.name }}, 0, this.{{ field.name }}.Length, segment.Array, segment.Offset + count + sizeof(ushort));
+		success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), {{ field.name }}Len);
+		count += sizeof(ushort);
+		count += {{ field.name }}Len;
+		{% else if field.type.category == "array" %}
+		success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)this.{{ field.name }}s.Count);
+		count += sizeof(ushort);
+		foreach ({{ pascal_case(field.name) }} {{ field.name }} in this.{{ field.name }}s)
+			success &= {{ field.name }}.Write(s, segment, ref count);
+		{% else if field.type.category == "struct" %}
+		{% for struct in structs %}
+		{% if struct.name == field.type.name %}
+		{% for struct_field in struct.fields %}
+		{% if struct_field.type.category == "primitive" and (struct_field.type.name == "byte" or struct_field.type.name == "sbyte") %}
+		segment.Array[segment.Offset + count] = (byte)this.{{ field.name }}{{ pascal_case(struct_field.name) }};
+		count += sizeof({{ decl_type(struct_field.type) }});
+		{% else if struct_field.type.category == "primitive" %}
+		success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), {{ field.name }}{{ pascal_case(struct_field.name) }});
+		count += sizeof({{ decl_type(struct_field.type) }});
+		{% else if struct_field.type.category == "string" %}
+		ushort {{ field.name }}{{ pascal_case(struct_field.name) }}Len = (ushort)Encoding.Unicode.GetBytes(this.{{ field.name }}{{ pascal_case(struct_field.name) }}, 0, this.{{ field.name }}{{ pascal_case(struct_field.name) }}.Length, segment.Array, segment.Offset + count + sizeof(ushort));
+		success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), {{ field.name }}{{ pascal_case(struct_field.name) }}Len);
+		count += sizeof(ushort);
+		count += {{ field.name }}{{ pascal_case(struct_field.name) }}Len;
+		{% endif %}
+		{% endfor %}
+		{% endif %}
+		{% endfor %}
+		{% endif %}
+		{% endfor %}
+        success &= BitConverter.TryWriteBytes(s, (ushort)(count - 2));
+        if (success == false)
+            return null;
+        return SendBufferHelper.Close(count);
+    }
+}
+{% endfor %}
+

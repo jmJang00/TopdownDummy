@@ -1,0 +1,18 @@
+#pragma once
+
+#include <JNet/CSession.h>
+#include "Packet.h"
+
+class Stub
+{
+public:
+	{% for message in messages %}
+	{% if can_recv(message.direction) %}
+	virtual int {{ message.name }}(FSessionId sessionId{% for field in message.fields %}, {{ arg_type(field.type) }} {{ field.name }}{% endfor %})
+	{
+		return PH_SUCCESS;
+	}
+
+	{% endif %}
+	{% endfor %}
+};

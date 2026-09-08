@@ -1,0 +1,38 @@
+tree
+{
+	sequence 
+	{
+		leaf Delay(30)
+		leaf Connect()
+		leaf Login()
+		leaf Move()
+		decorator RepeatUntilFail() 
+		{
+			selector			
+			{
+				decorator Cooldown(30) 
+				{
+					decorator Random(2)
+					{
+						leaf Disconnect()
+					}
+				}
+				decorator Random(30)
+				{
+					decorator Cooldown(500) 
+					{
+						leaf Chat()
+					}
+				}
+				decorator Random(30)
+				{
+					decorator Cooldown(500) 
+					{
+						leaf Move()
+					}
+				}
+				leaf Idle()
+			}
+		}
+	}
+}

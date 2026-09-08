@@ -1,0 +1,66 @@
+#pragma once
+
+#include <JNet/CSession.h>
+#include <JNet/INetworkEntity.h>
+#include "Packet.h"
+
+class CNetServer;
+class CNetClient;
+class DummyClient;
+
+struct MessageArgs
+{
+	MessageArgs(PacketType protocol_)
+        : protocol(protocol_)
+    {
+    }
+
+	PacketType protocol;
+};
+
+{% for message in messages %}
+{% if can_send(message.direction) %}
+struct {{ message.name }}Args : public MessageArgs
+{
+	{{ message.name }}Args({% for field in message.fields %}{{ arg_type(field.type) }} {{ field.name }}_, {% endfor %} PacketType protocol_ = PacketType::{{ message.packet_enum }})
+		: MessageArgs(protocol_)
+		{% for field in message.fields %}
+		, {{ field.name }}({{ field.name }}_)
+		{% endfor %}
+	{
+	}
+
+	{% for field in message.fields %}
+	{{ decl_type(field.type) }} {{ field.name }};
+	{% endfor %}
+};
+
+{% endif %}
+{% endfor %}
+
+class Proxy
+{
+public:
+	Proxy(DummyClient* server)
+	{
+		_server = server;
+	}
+
+public:
+	{% for message in messages %}
+	{% if can_send(message.direction) %}
+	bool {{ message.name }}(FSessionId sessionId{% for field in message.fields %}, {{ arg_type(field.type) }} {{ field.name }}{% endfor %});
+	bool {{ message.name }}(FSessionId* sessionIds, size_t cnt{% for field in message.fields %}, {{ arg_type(field.type) }} {{ field.name }}{% endfor %});
+	bool {{ message.name }}(FSessionId sessionId, const {{ message.name }}Args* args);
+	bool {{ message.name }}(FSessionId* sessionIds, size_t cnt, const {{ message.name }}Args* args);
+
+	{% endif %}
+	{% endfor %}
+
+	bool Send(FSessionId* sessionIds, size_t cnt, const MessageArgs* args);
+	bool Send(FSessionId sessionId, const MessageArgs* args);
+
+private:
+	DummyClient* _server;
+
+};

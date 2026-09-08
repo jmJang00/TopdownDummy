@@ -1,0 +1,43 @@
+#pragma once
+#include <type_traits>
+#include <JNet/CSession.h>
+#include "Stub.h"
+#include "Packet.h"
+
+class CPacket;
+class CPacketView;
+
+class PacketManager
+{
+public:
+	PacketManager()
+	{
+		_stub = new Stub();
+	}
+
+	~PacketManager()
+	{
+		delete _stub;
+	}
+
+	void Attach(Stub* stub)
+	{
+        delete _stub;
+        _stub = stub;
+	}
+
+	int GetLastError() { return _lastError; }
+
+	bool PacketProc(PacketType type, CPacketView* packet, FSessionId sessionId);
+
+private:
+
+	{% for message in messages %}
+	{% if can_recv(message.direction) %}
+	bool PP_{{ message.name }}(CPacketView* packet, FSessionId sessionId);
+	{% endif %}
+	{% endfor %}
+
+	Stub* _stub;
+	int _lastError;
+};

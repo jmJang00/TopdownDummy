@@ -1,0 +1,52 @@
+tree
+{
+	sequence 
+	{
+		leaf Delay(/*ms*/1000)
+		leaf Connect()
+		leaf Login()
+		leaf Delay(/*ms*/2000) // 재접속인 경우 기다림
+		decorator RepeatUntilFail()
+		{
+			selector
+			{
+				sequence
+				{
+					leaf FindMatch() // 재접속 되는 경우 무시
+					leaf Ready()
+					leaf WeaponSelect(/*type*/0)
+					leaf SpawnCheck()
+					decorator RepeatUntilFail()
+					{
+						selector
+						{
+							decorator Random(/*percent*/90)
+							{
+								decorator Cooldown(/*ms*/40)
+								{
+									leaf Move()
+								}
+							}
+							decorator Random(/*percent*/90)
+							{
+								decorator Cooldown(/*ms*/40)
+								{
+									leaf Rotate()
+								}
+							}
+							decorator Random(/*percent*/90)
+							{
+								decorator Cooldown(/*ms*/40)
+								{
+									leaf ProjectileShoot()
+								}
+							}
+							leaf GameIdle()
+						}
+					}
+				}
+				leaf MatchIdle()
+			}
+		}
+	}
+}
