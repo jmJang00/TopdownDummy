@@ -68,11 +68,15 @@ enum PacketType : ushort {
     S_CLOSE_CHEST = 1005,
     S_NTF_CHEST_INFO = 1006,
     C_REQ_INVENTORY_TO_CHEST = 1007,
-    S_RES_INVENTORY_TO_CHEST = 1008,
+    S_RES_INVENTORY_TO_CHEST = 1008, // 아직 사용하지 않음
     C_REQ_CHEST_TO_INVENTORY = 1009,
-    S_RES_CHEST_TO_INVENTORY = 1010,
+    S_RES_CHEST_TO_INVENTORY = 1010, // 아직 사용하지 않음
     C_REQ_INVENTORY_INFO = 1011,
     S_RES_INVENTORY_INFO = 1012,
+    C_REQ_USE_ITEM = 1013,
+    S_RES_USE_ITEM = 1014, // 아직 사용하지 않음
+    C_REQ_DROP_ITEM = 1015,
+    S_RES_DROP_ITEM = 1016, // 아직 사용하지 않음
 
     // 1100 - 이동
     C_MOVE_START = 1100,
@@ -320,29 +324,28 @@ message S_ProjectileHit {
 
 [direction(client_to_server)]
 [packet(C_HITSCAN_SHOOT_START)]
+[nolog]
 message C_HitscanShootStart
 {
     int clientTick;
-    float startX;
-    float startY;
-    float endX;
-    float endY;
+    Vector2 start;
+    Vector2 end;
 }
 
 [direction(server_to_client)]
 [packet(S_HITSCAN_SHOOT_START)]
+[nolog]
 message S_HitscanShootStart
 {
     int acceptTick;
     uint entityId;
-    float startX;
-    float startY;
-    float endX;
-    float endY;
+    Vector2 start;
+    Vector2 end;
 }
 
 [direction(server_to_client)]
 [packet(S_NTF_HITSCAN_SHOOT_START)]
+[nolog]
 message S_NtfHitscanShootStart
 {
     int accpetTick;
@@ -351,6 +354,7 @@ message S_NtfHitscanShootStart
 
 [direction(server_to_client)]
 [packet(S_NTF_HITSCAN_SHOOT_STATE)]
+[nolog]
 message S_NtfHitscanShootState
 {
     int serverTick;
@@ -362,6 +366,7 @@ message S_NtfHitscanShootState
 
 [direction(client_to_server)]
 [packet(C_HITSCAN_HIT)]
+[nolog]
 message C_HitscanHit
 {
     int currentTick;
@@ -371,6 +376,7 @@ message C_HitscanHit
 
 [direction(server_to_client)]
 [packet(S_HITSCAN_HIT)]
+[nolog]
 message S_HitscanHit
 {
     int serverTick;
@@ -381,6 +387,7 @@ message S_HitscanHit
 
 [direction(client_to_server)]
 [packet(C_REQ_RELOAD_BULLET)]
+[nolog]
 message C_ReqReloadBullet
 {
     int clientTick;
@@ -388,6 +395,7 @@ message C_ReqReloadBullet
 
 [direction(server_to_client)]
 [packet(S_NTF_UPDATE_BULLET)]
+[nolog]
 message S_NtfUpdateBullet
 {
     int serverTick;
@@ -399,6 +407,7 @@ message S_NtfUpdateBullet
 // 900 - 아이템 ================================================================================
 [direction(server_to_client)]
 [packet(S_NTF_SPAWN_ITEM_PICKER)]
+[nolog]
 message S_NtfSpawnItemPicker
 {
     int serverTick;
@@ -410,15 +419,19 @@ message S_NtfSpawnItemPicker
 
 [direction(server_to_client)]
 [packet(S_NTF_DESPAWN_ITEM_PICKER)]
+[nolog]
 message S_NtfDespawnItemPicker
 {
     int serverTick;
     uint entityId;
     uint itemType;
+    bool isObtained;
+    uint obtainEntityId;
 }
 
 [direction(client_to_server)]
 [packet(C_REQ_PICKUP_ITEM_PICKER)]
+[nolog]
 message C_ReqPickupItemPicker
 {
     int clientTick;
@@ -542,6 +555,23 @@ message S_ResChestToInventory
     ushort resultCode;
 }
 
+[direction(client_to_server)]
+[packet(C_REQ_USE_ITEM)]
+message C_ReqUseItem
+{
+    int clientTick;
+    int lastInventoryUpdateTick;    
+    uint inventoryCursor;    
+}
+
+[direction(client_to_server)]
+[packet(C_REQ_DROP_ITEM)]
+message C_ReqDropItem
+{
+    int clientTick;
+    int lastInventoryUpdateTick;
+    uint inventoryCursor;
+}
 
 // 1100 - 이동 ================================================================================
 

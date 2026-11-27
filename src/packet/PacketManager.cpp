@@ -407,20 +407,15 @@ bool PacketManager::PP_S_ProjectileHit(CPacketView* packet, FSessionId sessionId
 }
 bool PacketManager::PP_S_HitscanShootStart(CPacketView* packet, FSessionId sessionId)
 {
-	DLOGHA(L"Packet", L"Recv", (unsigned char*)packet->GetBufferPtr(), packet->GetBufferSize());
 
 	int32_t acceptTick;
 	*packet >> acceptTick;
 	uint32_t entityId;
 	*packet >> entityId;
-	float startX;
-	*packet >> startX;
-	float startY;
-	*packet >> startY;
-	float endX;
-	*packet >> endX;
-	float endY;
-	*packet >> endY;
+	Vector2 start;
+	*packet >> start;
+	Vector2 end;
+	*packet >> end;
 
 	if (packet->GetLastError() != CPacketView::Default)
 	{
@@ -428,7 +423,7 @@ bool PacketManager::PP_S_HitscanShootStart(CPacketView* packet, FSessionId sessi
 		return false;
 	}
 
-	_lastError = _stub->S_HitscanShootStart(sessionId, acceptTick, entityId, startX, startY, endX, endY);
+	_lastError = _stub->S_HitscanShootStart(sessionId, acceptTick, entityId, start, end);
 	if (_lastError != PH_SUCCESS)
 	{
 		DLOGA(L"Packet", L"Packet Process Fail %d", _lastError);
@@ -441,7 +436,6 @@ bool PacketManager::PP_S_HitscanShootStart(CPacketView* packet, FSessionId sessi
 }
 bool PacketManager::PP_S_NtfHitscanShootStart(CPacketView* packet, FSessionId sessionId)
 {
-	DLOGHA(L"Packet", L"Recv", (unsigned char*)packet->GetBufferPtr(), packet->GetBufferSize());
 
 	int32_t accpetTick;
 	*packet >> accpetTick;
@@ -467,7 +461,6 @@ bool PacketManager::PP_S_NtfHitscanShootStart(CPacketView* packet, FSessionId se
 }
 bool PacketManager::PP_S_NtfHitscanShootState(CPacketView* packet, FSessionId sessionId)
 {
-	DLOGHA(L"Packet", L"Recv", (unsigned char*)packet->GetBufferPtr(), packet->GetBufferSize());
 
 	int32_t serverTick;
 	*packet >> serverTick;
@@ -499,7 +492,6 @@ bool PacketManager::PP_S_NtfHitscanShootState(CPacketView* packet, FSessionId se
 }
 bool PacketManager::PP_S_HitscanHit(CPacketView* packet, FSessionId sessionId)
 {
-	DLOGHA(L"Packet", L"Recv", (unsigned char*)packet->GetBufferPtr(), packet->GetBufferSize());
 
 	int32_t serverTick;
 	*packet >> serverTick;
@@ -529,7 +521,6 @@ bool PacketManager::PP_S_HitscanHit(CPacketView* packet, FSessionId sessionId)
 }
 bool PacketManager::PP_S_NtfUpdateBullet(CPacketView* packet, FSessionId sessionId)
 {
-	DLOGHA(L"Packet", L"Recv", (unsigned char*)packet->GetBufferPtr(), packet->GetBufferSize());
 
 	int32_t serverTick;
 	*packet >> serverTick;
@@ -555,7 +546,6 @@ bool PacketManager::PP_S_NtfUpdateBullet(CPacketView* packet, FSessionId session
 }
 bool PacketManager::PP_S_NtfSpawnItemPicker(CPacketView* packet, FSessionId sessionId)
 {
-	DLOGHA(L"Packet", L"Recv", (unsigned char*)packet->GetBufferPtr(), packet->GetBufferSize());
 
 	int32_t serverTick;
 	*packet >> serverTick;
@@ -587,7 +577,6 @@ bool PacketManager::PP_S_NtfSpawnItemPicker(CPacketView* packet, FSessionId sess
 }
 bool PacketManager::PP_S_NtfDespawnItemPicker(CPacketView* packet, FSessionId sessionId)
 {
-	DLOGHA(L"Packet", L"Recv", (unsigned char*)packet->GetBufferPtr(), packet->GetBufferSize());
 
 	int32_t serverTick;
 	*packet >> serverTick;
@@ -595,6 +584,10 @@ bool PacketManager::PP_S_NtfDespawnItemPicker(CPacketView* packet, FSessionId se
 	*packet >> entityId;
 	uint32_t itemType;
 	*packet >> itemType;
+	bool isObtained;
+	*packet >> isObtained;
+	uint32_t obtainEntityId;
+	*packet >> obtainEntityId;
 
 	if (packet->GetLastError() != CPacketView::Default)
 	{
@@ -602,7 +595,7 @@ bool PacketManager::PP_S_NtfDespawnItemPicker(CPacketView* packet, FSessionId se
 		return false;
 	}
 
-	_lastError = _stub->S_NtfDespawnItemPicker(sessionId, serverTick, entityId, itemType);
+	_lastError = _stub->S_NtfDespawnItemPicker(sessionId, serverTick, entityId, itemType, isObtained, obtainEntityId);
 	if (_lastError != PH_SUCCESS)
 	{
 		DLOGA(L"Packet", L"Packet Process Fail %d", _lastError);

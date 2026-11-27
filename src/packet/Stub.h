@@ -81,7 +81,7 @@ public:
 		return PH_SUCCESS;
 	}
 
-	virtual int S_HitscanShootStart(FSessionId sessionId, int32_t acceptTick, uint32_t entityId, float startX, float startY, float endX, float endY)
+	virtual int S_HitscanShootStart(FSessionId sessionId, int32_t acceptTick, uint32_t entityId, const Vector2& start, const Vector2& end)
 	{
 		return PH_SUCCESS;
 	}
@@ -111,7 +111,7 @@ public:
 		return PH_SUCCESS;
 	}
 
-	virtual int S_NtfDespawnItemPicker(FSessionId sessionId, int32_t serverTick, uint32_t entityId, uint32_t itemType)
+	virtual int S_NtfDespawnItemPicker(FSessionId sessionId, int32_t serverTick, uint32_t entityId, uint32_t itemType, bool isObtained, uint32_t obtainEntityId)
 	{
 		return PH_SUCCESS;
 	}

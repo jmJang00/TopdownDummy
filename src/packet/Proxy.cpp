@@ -1691,16 +1691,14 @@ bool Proxy::C_ProjectileShootStart(FSessionId* sessionIds, size_t cnt, const C_P
 	return true;
 }
 
-bool Proxy::C_HitscanShootStart(FSessionId sessionId, int32_t clientTick, float startX, float startY, float endX, float endY)
+bool Proxy::C_HitscanShootStart(FSessionId sessionId, int32_t clientTick, const Vector2& start, const Vector2& end)
 {
 	CPacket* packet = CPacket::Alloc(false);
 
 	*packet << (unsigned short)PacketType::C_HITSCAN_SHOOT_START;
 	*packet << clientTick;
-	*packet << startX;
-	*packet << startY;
-	*packet << endX;
-	*packet << endY;
+	*packet << start;
+	*packet << end;
 
 	if (packet->GetLastError() != CPacket::Default)
 	{
@@ -1713,30 +1711,20 @@ bool Proxy::C_HitscanShootStart(FSessionId sessionId, int32_t clientTick, float 
 
 	_server->SendPacket(sessionId, packet->GetPacketBuffer());
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeaderEx) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
 	return true;
 }
 
-bool Proxy::C_HitscanShootStart(FSessionId* sessionIds, size_t cnt, int32_t clientTick, float startX, float startY, float endX, float endY)
+bool Proxy::C_HitscanShootStart(FSessionId* sessionIds, size_t cnt, int32_t clientTick, const Vector2& start, const Vector2& end)
 {
 	CPacket* packet = CPacket::Alloc(false);
 
 	*packet << (unsigned short)PacketType::C_HITSCAN_SHOOT_START;
 	*packet << clientTick;
-	*packet << startX;
-	*packet << startY;
-	*packet << endX;
-	*packet << endY;
+	*packet << start;
+	*packet << end;
 
 	if (packet->GetLastError() != CPacket::Default)
 	{
@@ -1752,14 +1740,6 @@ bool Proxy::C_HitscanShootStart(FSessionId* sessionIds, size_t cnt, int32_t clie
 		_server->SendPacket(sessionIds[i], packet->GetPacketBuffer());
 	}
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
@@ -1772,10 +1752,8 @@ bool Proxy::C_HitscanShootStart(FSessionId sessionId, const C_HitscanShootStartA
 
 	*packet << (unsigned short)PacketType::C_HITSCAN_SHOOT_START;
 	*packet << args->clientTick;
-	*packet << args->startX;
-	*packet << args->startY;
-	*packet << args->endX;
-	*packet << args->endY;
+	*packet << args->start;
+	*packet << args->end;
 
 	if (packet->GetLastError() != CPacket::Default)
 	{
@@ -1788,14 +1766,6 @@ bool Proxy::C_HitscanShootStart(FSessionId sessionId, const C_HitscanShootStartA
 
 	_server->SendPacket(sessionId, packet->GetPacketBuffer());
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
@@ -1808,10 +1778,8 @@ bool Proxy::C_HitscanShootStart(FSessionId* sessionIds, size_t cnt, const C_Hits
 
 	*packet << (unsigned short)PacketType::C_HITSCAN_SHOOT_START;
 	*packet << args->clientTick;
-	*packet << args->startX;
-	*packet << args->startY;
-	*packet << args->endX;
-	*packet << args->endY;
+	*packet << args->start;
+	*packet << args->end;
 
 	if (packet->GetLastError() != CPacket::Default)
 	{
@@ -1827,14 +1795,6 @@ bool Proxy::C_HitscanShootStart(FSessionId* sessionIds, size_t cnt, const C_Hits
 		_server->SendPacket(sessionIds[i], packet->GetPacketBuffer());
 	}
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
@@ -1861,14 +1821,6 @@ bool Proxy::C_HitscanHit(FSessionId sessionId, int32_t currentTick, uint32_t sho
 
 	_server->SendPacket(sessionId, packet->GetPacketBuffer());
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeaderEx) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
@@ -1898,14 +1850,6 @@ bool Proxy::C_HitscanHit(FSessionId* sessionIds, size_t cnt, int32_t currentTick
 		_server->SendPacket(sessionIds[i], packet->GetPacketBuffer());
 	}
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
@@ -1932,14 +1876,6 @@ bool Proxy::C_HitscanHit(FSessionId sessionId, const C_HitscanHitArgs* args)
 
 	_server->SendPacket(sessionId, packet->GetPacketBuffer());
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
@@ -1969,14 +1905,6 @@ bool Proxy::C_HitscanHit(FSessionId* sessionIds, size_t cnt, const C_HitscanHitA
 		_server->SendPacket(sessionIds[i], packet->GetPacketBuffer());
 	}
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
@@ -2001,14 +1929,6 @@ bool Proxy::C_ReqReloadBullet(FSessionId sessionId, int32_t clientTick)
 
 	_server->SendPacket(sessionId, packet->GetPacketBuffer());
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeaderEx) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
@@ -2036,14 +1956,6 @@ bool Proxy::C_ReqReloadBullet(FSessionId* sessionIds, size_t cnt, int32_t client
 		_server->SendPacket(sessionIds[i], packet->GetPacketBuffer());
 	}
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
@@ -2068,14 +1980,6 @@ bool Proxy::C_ReqReloadBullet(FSessionId sessionId, const C_ReqReloadBulletArgs*
 
 	_server->SendPacket(sessionId, packet->GetPacketBuffer());
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
@@ -2103,14 +2007,6 @@ bool Proxy::C_ReqReloadBullet(FSessionId* sessionIds, size_t cnt, const C_ReqRel
 		_server->SendPacket(sessionIds[i], packet->GetPacketBuffer());
 	}
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
@@ -2136,14 +2032,6 @@ bool Proxy::C_ReqPickupItemPicker(FSessionId sessionId, int32_t clientTick, uint
 
 	_server->SendPacket(sessionId, packet->GetPacketBuffer());
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeaderEx) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
@@ -2172,14 +2060,6 @@ bool Proxy::C_ReqPickupItemPicker(FSessionId* sessionIds, size_t cnt, int32_t cl
 		_server->SendPacket(sessionIds[i], packet->GetPacketBuffer());
 	}
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
@@ -2205,14 +2085,6 @@ bool Proxy::C_ReqPickupItemPicker(FSessionId sessionId, const C_ReqPickupItemPic
 
 	_server->SendPacket(sessionId, packet->GetPacketBuffer());
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
@@ -2241,14 +2113,6 @@ bool Proxy::C_ReqPickupItemPicker(FSessionId* sessionIds, size_t cnt, const C_Re
 		_server->SendPacket(sessionIds[i], packet->GetPacketBuffer());
 	}
 
-	if (packet->Encoding())
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
-	else
-	{
-		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
-	}
 
 	CPacket::Free(packet);
 
@@ -2973,6 +2837,290 @@ bool Proxy::C_ReqChestToInventory(FSessionId* sessionIds, size_t cnt, const C_Re
 	return true;
 }
 
+bool Proxy::C_ReqUseItem(FSessionId sessionId, int32_t clientTick, int32_t lastInventoryUpdateTick, uint32_t inventoryCursor)
+{
+	CPacket* packet = CPacket::Alloc(false);
+
+	*packet << (unsigned short)PacketType::C_REQ_USE_ITEM;
+	*packet << clientTick;
+	*packet << lastInventoryUpdateTick;
+	*packet << inventoryCursor;
+
+	if (packet->GetLastError() != CPacket::Default)
+	{
+		CPacket::Free(packet);
+		DLOGA(L"Packet", L"Make Packet Fail");
+		return false;
+	}
+
+	packet->Commit();
+
+	_server->SendPacket(sessionId, packet->GetPacketBuffer());
+
+	if (packet->Encoding())
+	{
+		DLOGHA(L"Packet", L"Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeaderEx) - sizeof(PacketType));
+	}
+	else
+	{
+		DLOGHA(L"Packet", L"Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+
+	CPacket::Free(packet);
+
+	return true;
+}
+
+bool Proxy::C_ReqUseItem(FSessionId* sessionIds, size_t cnt, int32_t clientTick, int32_t lastInventoryUpdateTick, uint32_t inventoryCursor)
+{
+	CPacket* packet = CPacket::Alloc(false);
+
+	*packet << (unsigned short)PacketType::C_REQ_USE_ITEM;
+	*packet << clientTick;
+	*packet << lastInventoryUpdateTick;
+	*packet << inventoryCursor;
+
+	if (packet->GetLastError() != CPacket::Default)
+	{
+		CPacket::Free(packet);
+		DLOGA(L"Packet", L"Make Packet Fail");
+		return false;
+	}
+
+	packet->Commit();
+
+	for (size_t i = 0; i < cnt; i++)
+	{
+		_server->SendPacket(sessionIds[i], packet->GetPacketBuffer());
+	}
+
+	if (packet->Encoding())
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+	else
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+
+	CPacket::Free(packet);
+
+	return true;
+}
+
+bool Proxy::C_ReqUseItem(FSessionId sessionId, const C_ReqUseItemArgs* args)
+{
+	CPacket* packet = CPacket::Alloc(false);
+
+	*packet << (unsigned short)PacketType::C_REQ_USE_ITEM;
+	*packet << args->clientTick;
+	*packet << args->lastInventoryUpdateTick;
+	*packet << args->inventoryCursor;
+
+	if (packet->GetLastError() != CPacket::Default)
+	{
+		CPacket::Free(packet);
+		DLOGA(L"Packet", L"Make Packet Fail");
+		return false;
+	}
+
+	packet->Commit();
+
+	_server->SendPacket(sessionId, packet->GetPacketBuffer());
+
+	if (packet->Encoding())
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+	else
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+
+	CPacket::Free(packet);
+
+	return true;
+}
+
+bool Proxy::C_ReqUseItem(FSessionId* sessionIds, size_t cnt, const C_ReqUseItemArgs* args)
+{
+	CPacket* packet = CPacket::Alloc(false);
+
+	*packet << (unsigned short)PacketType::C_REQ_USE_ITEM;
+	*packet << args->clientTick;
+	*packet << args->lastInventoryUpdateTick;
+	*packet << args->inventoryCursor;
+
+	if (packet->GetLastError() != CPacket::Default)
+	{
+		CPacket::Free(packet);
+		DLOGA(L"Packet", L"Make Packet Fail");
+		return false;
+	}
+
+	packet->Commit();
+
+	for (size_t i = 0; i < cnt; i++)
+	{
+		_server->SendPacket(sessionIds[i], packet->GetPacketBuffer());
+	}
+
+	if (packet->Encoding())
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+	else
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+
+	CPacket::Free(packet);
+
+	return true;
+}
+
+bool Proxy::C_ReqDropItem(FSessionId sessionId, int32_t clientTick, int32_t lastInventoryUpdateTick, uint32_t inventoryCursor)
+{
+	CPacket* packet = CPacket::Alloc(false);
+
+	*packet << (unsigned short)PacketType::C_REQ_DROP_ITEM;
+	*packet << clientTick;
+	*packet << lastInventoryUpdateTick;
+	*packet << inventoryCursor;
+
+	if (packet->GetLastError() != CPacket::Default)
+	{
+		CPacket::Free(packet);
+		DLOGA(L"Packet", L"Make Packet Fail");
+		return false;
+	}
+
+	packet->Commit();
+
+	_server->SendPacket(sessionId, packet->GetPacketBuffer());
+
+	if (packet->Encoding())
+	{
+		DLOGHA(L"Packet", L"Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeaderEx) - sizeof(PacketType));
+	}
+	else
+	{
+		DLOGHA(L"Packet", L"Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+
+	CPacket::Free(packet);
+
+	return true;
+}
+
+bool Proxy::C_ReqDropItem(FSessionId* sessionIds, size_t cnt, int32_t clientTick, int32_t lastInventoryUpdateTick, uint32_t inventoryCursor)
+{
+	CPacket* packet = CPacket::Alloc(false);
+
+	*packet << (unsigned short)PacketType::C_REQ_DROP_ITEM;
+	*packet << clientTick;
+	*packet << lastInventoryUpdateTick;
+	*packet << inventoryCursor;
+
+	if (packet->GetLastError() != CPacket::Default)
+	{
+		CPacket::Free(packet);
+		DLOGA(L"Packet", L"Make Packet Fail");
+		return false;
+	}
+
+	packet->Commit();
+
+	for (size_t i = 0; i < cnt; i++)
+	{
+		_server->SendPacket(sessionIds[i], packet->GetPacketBuffer());
+	}
+
+	if (packet->Encoding())
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+	else
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+
+	CPacket::Free(packet);
+
+	return true;
+}
+
+bool Proxy::C_ReqDropItem(FSessionId sessionId, const C_ReqDropItemArgs* args)
+{
+	CPacket* packet = CPacket::Alloc(false);
+
+	*packet << (unsigned short)PacketType::C_REQ_DROP_ITEM;
+	*packet << args->clientTick;
+	*packet << args->lastInventoryUpdateTick;
+	*packet << args->inventoryCursor;
+
+	if (packet->GetLastError() != CPacket::Default)
+	{
+		CPacket::Free(packet);
+		DLOGA(L"Packet", L"Make Packet Fail");
+		return false;
+	}
+
+	packet->Commit();
+
+	_server->SendPacket(sessionId, packet->GetPacketBuffer());
+
+	if (packet->Encoding())
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+	else
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+
+	CPacket::Free(packet);
+
+	return true;
+}
+
+bool Proxy::C_ReqDropItem(FSessionId* sessionIds, size_t cnt, const C_ReqDropItemArgs* args)
+{
+	CPacket* packet = CPacket::Alloc(false);
+
+	*packet << (unsigned short)PacketType::C_REQ_DROP_ITEM;
+	*packet << args->clientTick;
+	*packet << args->lastInventoryUpdateTick;
+	*packet << args->inventoryCursor;
+
+	if (packet->GetLastError() != CPacket::Default)
+	{
+		CPacket::Free(packet);
+		DLOGA(L"Packet", L"Make Packet Fail");
+		return false;
+	}
+
+	packet->Commit();
+
+	for (size_t i = 0; i < cnt; i++)
+	{
+		_server->SendPacket(sessionIds[i], packet->GetPacketBuffer());
+	}
+
+	if (packet->Encoding())
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeaderEx) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+	else
+	{
+		DLOGHA(L"Packet", L"Multi Send", (unsigned char*)packet->GetBufferPtr() + sizeof(FHeader) + sizeof(PacketType), packet->GetBufferSize() - sizeof(FHeader) - sizeof(PacketType));
+	}
+
+	CPacket::Free(packet);
+
+	return true;
+}
+
 bool Proxy::C_MoveStart(FSessionId sessionId, int32_t clientTick, const Vector2& target)
 {
 	CPacket* packet = CPacket::Alloc(false);
@@ -3278,6 +3426,14 @@ bool Proxy::Send(FSessionId* sessionIds, size_t cnt, const MessageArgs* args)
 	{
 		return C_ReqChestToInventory(sessionIds, cnt, (const C_ReqChestToInventoryArgs*)args);
 	}
+	case PacketType::C_REQ_USE_ITEM:
+	{
+		return C_ReqUseItem(sessionIds, cnt, (const C_ReqUseItemArgs*)args);
+	}
+	case PacketType::C_REQ_DROP_ITEM:
+	{
+		return C_ReqDropItem(sessionIds, cnt, (const C_ReqDropItemArgs*)args);
+	}
 	case PacketType::C_MOVE_START:
 	{
 		return C_MoveStart(sessionIds, cnt, (const C_MoveStartArgs*)args);
@@ -3382,6 +3538,14 @@ bool Proxy::Send(FSessionId sessionId, const MessageArgs* args)
 	case PacketType::C_REQ_CHEST_TO_INVENTORY:
 	{
 		return C_ReqChestToInventory(sessionId, (const C_ReqChestToInventoryArgs*)args);
+	}
+	case PacketType::C_REQ_USE_ITEM:
+	{
+		return C_ReqUseItem(sessionId, (const C_ReqUseItemArgs*)args);
+	}
+	case PacketType::C_REQ_DROP_ITEM:
+	{
+		return C_ReqDropItem(sessionId, (const C_ReqDropItemArgs*)args);
 	}
 	case PacketType::C_MOVE_START:
 	{

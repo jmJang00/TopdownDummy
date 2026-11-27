@@ -230,7 +230,7 @@ void PlayerBT::PrintStack()
 	{
 		stackStr += nodeStack[nodeStack.size() - i - 1]->GetNodeStatus() + L" ";
 	}
-	DLOGA(L"DummyClient", L"%s", stackStr.c_str());
+	SLOGA(L"DummyClient", L"%s", stackStr.c_str());
 }
 
 void PlayerBT::PrintHistory()
@@ -241,7 +241,7 @@ void PlayerBT::PrintHistory()
 	{
 		historyStr += history[(historyIndex - i + size) % size]->GetNodeStatus() + L" ";
 	}
-	DLOGA(L"DummyClient", L"%s", historyStr.c_str());
+	SLOGA(L"DummyClient", L"%s", historyStr.c_str());
 }
 
 void PlayerBT::RecordNode()

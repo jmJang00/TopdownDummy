@@ -53,7 +53,7 @@ public:
 
 	void OnError(ENetError errCode, const char* errMsg) override 
 	{
-		DLOGA(L"DummyClient", L"%S", errMsg);
+		SLOGA(L"DummyClient", L"%S", errMsg);
 	}
 
 	void OnPrintExternal(CMonitorTable* table) override;

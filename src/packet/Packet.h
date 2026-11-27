@@ -75,6 +75,10 @@ enum class PacketType: uint16_t
     S_RES_CHEST_TO_INVENTORY=1010,
     C_REQ_INVENTORY_INFO=1011,
     S_RES_INVENTORY_INFO=1012,
+    C_REQ_USE_ITEM=1013,
+    S_RES_USE_ITEM=1014,
+    C_REQ_DROP_ITEM=1015,
+    S_RES_DROP_ITEM=1016,
     C_MOVE_START=1100,
     S_MOVE_START=1101,
     S_MOVE_STATE=1102,
@@ -84,7 +88,7 @@ enum class PacketType: uint16_t
     S_ROTATE_STATE=1106,
 }; 
  
-inline constexpr int PACKET_TYPE_MAX = 59;
+inline constexpr int PACKET_TYPE_MAX = 63;
 
 
 DISABLE_WARNINGS_BEGIN(WARNING_26495)
@@ -184,6 +188,8 @@ enum class RequestId : unsigned short
     ReqInventoryInfo,
     ReqInventoryToChest,
     ReqChestToInventory,
+    ReqUseItem,
+    ReqDropItem,
     MoveStart,
     RotateStart,
 	MaxRequest

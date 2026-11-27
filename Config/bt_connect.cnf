@@ -1,0 +1,10 @@
+tree
+{
+	sequence 
+	{
+		leaf Delay(/*ms*/100)
+		leaf Connect()
+		leaf Delay(/*ms*/100) // 재접속인 경우 기다림
+		leaf Disconnect()
+	}
+}

@@ -435,7 +435,10 @@ void Player::RecvProcess(PacketType type, bool success, uint64_t responseTime)
 	{
 		_request.responseTime = responseTime;
 		
-		SMPL_PRO_RECORD(EDummyProfile::DUMMY_PROFILE_PKT_DELAY, _request.responseTime - _request.requestTime);
+		if (type != PacketType::S_MATCH_FOUND)
+		{
+			SMPL_PRO_RECORD(EDummyProfile::DUMMY_PROFILE_PKT_DELAY, _request.responseTime - _request.requestTime);
+		}
 
 		_request.responseTime = 0;
 		_request.requestTime = 0;

@@ -147,21 +147,17 @@ struct C_ProjectileShootStartArgs : public MessageArgs
 
 struct C_HitscanShootStartArgs : public MessageArgs
 {
-	C_HitscanShootStartArgs(int32_t clientTick_, float startX_, float startY_, float endX_, float endY_, PacketType protocol_ = PacketType::C_HITSCAN_SHOOT_START)
+	C_HitscanShootStartArgs(int32_t clientTick_, const Vector2& start_, const Vector2& end_, PacketType protocol_ = PacketType::C_HITSCAN_SHOOT_START)
 		: MessageArgs(protocol_)
 		, clientTick(clientTick_)
-		, startX(startX_)
-		, startY(startY_)
-		, endX(endX_)
-		, endY(endY_)
+		, start(start_)
+		, end(end_)
 	{
 	}
 
 	int32_t clientTick;
-	float startX;
-	float startY;
-	float endX;
-	float endY;
+	Vector2 start;
+	Vector2 end;
 };
 
 struct C_HitscanHitArgs : public MessageArgs
@@ -282,6 +278,36 @@ struct C_ReqChestToInventoryArgs : public MessageArgs
 	uint32_t chestCursor;
 };
 
+struct C_ReqUseItemArgs : public MessageArgs
+{
+	C_ReqUseItemArgs(int32_t clientTick_, int32_t lastInventoryUpdateTick_, uint32_t inventoryCursor_, PacketType protocol_ = PacketType::C_REQ_USE_ITEM)
+		: MessageArgs(protocol_)
+		, clientTick(clientTick_)
+		, lastInventoryUpdateTick(lastInventoryUpdateTick_)
+		, inventoryCursor(inventoryCursor_)
+	{
+	}
+
+	int32_t clientTick;
+	int32_t lastInventoryUpdateTick;
+	uint32_t inventoryCursor;
+};
+
+struct C_ReqDropItemArgs : public MessageArgs
+{
+	C_ReqDropItemArgs(int32_t clientTick_, int32_t lastInventoryUpdateTick_, uint32_t inventoryCursor_, PacketType protocol_ = PacketType::C_REQ_DROP_ITEM)
+		: MessageArgs(protocol_)
+		, clientTick(clientTick_)
+		, lastInventoryUpdateTick(lastInventoryUpdateTick_)
+		, inventoryCursor(inventoryCursor_)
+	{
+	}
+
+	int32_t clientTick;
+	int32_t lastInventoryUpdateTick;
+	uint32_t inventoryCursor;
+};
+
 struct C_MoveStartArgs : public MessageArgs
 {
 	C_MoveStartArgs(int32_t clientTick_, const Vector2& target_, PacketType protocol_ = PacketType::C_MOVE_START)
@@ -383,8 +409,8 @@ public:
 	bool C_ProjectileShootStart(FSessionId sessionId, const C_ProjectileShootStartArgs* args);
 	bool C_ProjectileShootStart(FSessionId* sessionIds, size_t cnt, const C_ProjectileShootStartArgs* args);
 
-	bool C_HitscanShootStart(FSessionId sessionId, int32_t clientTick, float startX, float startY, float endX, float endY);
-	bool C_HitscanShootStart(FSessionId* sessionIds, size_t cnt, int32_t clientTick, float startX, float startY, float endX, float endY);
+	bool C_HitscanShootStart(FSessionId sessionId, int32_t clientTick, const Vector2& start, const Vector2& end);
+	bool C_HitscanShootStart(FSessionId* sessionIds, size_t cnt, int32_t clientTick, const Vector2& start, const Vector2& end);
 	bool C_HitscanShootStart(FSessionId sessionId, const C_HitscanShootStartArgs* args);
 	bool C_HitscanShootStart(FSessionId* sessionIds, size_t cnt, const C_HitscanShootStartArgs* args);
 
@@ -427,6 +453,16 @@ public:
 	bool C_ReqChestToInventory(FSessionId* sessionIds, size_t cnt, int32_t clientTick, int32_t lastUpdateTick, int32_t lastInventoryUpdateTick, uint32_t entityId, uint32_t chestId, uint32_t chestCursor);
 	bool C_ReqChestToInventory(FSessionId sessionId, const C_ReqChestToInventoryArgs* args);
 	bool C_ReqChestToInventory(FSessionId* sessionIds, size_t cnt, const C_ReqChestToInventoryArgs* args);
+
+	bool C_ReqUseItem(FSessionId sessionId, int32_t clientTick, int32_t lastInventoryUpdateTick, uint32_t inventoryCursor);
+	bool C_ReqUseItem(FSessionId* sessionIds, size_t cnt, int32_t clientTick, int32_t lastInventoryUpdateTick, uint32_t inventoryCursor);
+	bool C_ReqUseItem(FSessionId sessionId, const C_ReqUseItemArgs* args);
+	bool C_ReqUseItem(FSessionId* sessionIds, size_t cnt, const C_ReqUseItemArgs* args);
+
+	bool C_ReqDropItem(FSessionId sessionId, int32_t clientTick, int32_t lastInventoryUpdateTick, uint32_t inventoryCursor);
+	bool C_ReqDropItem(FSessionId* sessionIds, size_t cnt, int32_t clientTick, int32_t lastInventoryUpdateTick, uint32_t inventoryCursor);
+	bool C_ReqDropItem(FSessionId sessionId, const C_ReqDropItemArgs* args);
+	bool C_ReqDropItem(FSessionId* sessionIds, size_t cnt, const C_ReqDropItemArgs* args);
 
 	bool C_MoveStart(FSessionId sessionId, int32_t clientTick, const Vector2& target);
 	bool C_MoveStart(FSessionId* sessionIds, size_t cnt, int32_t clientTick, const Vector2& target);

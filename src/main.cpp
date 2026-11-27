@@ -42,8 +42,8 @@ public:
 
 	bool Configure() override
 	{
-		CLogger::SetFileLogLevel(3);
-		CLogger::SetPrintLogLevel(LOG_LEVEL_SYSTEM);
+		CLogger::SetFileLogLevel(2);
+		CLogger::SetPrintLogLevel(2);
 		return true;
 	}
 

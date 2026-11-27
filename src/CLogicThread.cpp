@@ -114,9 +114,9 @@ int CLogicThread::GetMsgQSize() const
 void CLogicThread::LogicThread()
 {
 	CProfiler::Register(EDummyProfile::DUMMY_PROFILE_PKT_DELAY, L"Delay", L"Packet", 0.5f);
-	CProfiler::Register(EDummyProfile::DUMMY_PROFILE_CONN_DELAY, L"Delay", L"Conn", 1.f);
-	CProfiler::Register(EDummyProfile::DUMMY_PROFILE_DISCONN_DELAY, L"Delay", L"Disconn", 1.f);
-	CProfiler::Register(EDummyProfile::DUMMY_PROFILE_LOGIC_UPDATE, L"Delay", L"Simulate", 1.f);
+	//CProfiler::Register(EDummyProfile::DUMMY_PROFILE_CONN_DELAY, L"Delay", L"Conn", 1.f);
+	//CProfiler::Register(EDummyProfile::DUMMY_PROFILE_DISCONN_DELAY, L"Delay", L"Disconn", 1.f);
+	//CProfiler::Register(EDummyProfile::DUMMY_PROFILE_LOGIC_UPDATE, L"Delay", L"Simulate", 1.f);
 
 	DummyClient* dummy = (DummyClient*)_dummy;
 
@@ -131,7 +131,7 @@ void CLogicThread::LogicThread()
 		DWORD tick = timeGetTime();
 		DWORD deltaTick = tick - _globalTick;
 		SMPL_PRO_END(EDummyProfile::DUMMY_PROFILE_LOGIC_UPDATE);
-		if (profileTick + 60'000 < tick)
+		if (profileTick + 300'000 < tick)
 		{
 			profileTick = tick;
 			CProfiler::Flush();
